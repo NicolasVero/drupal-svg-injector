@@ -1,0 +1,5 @@
+name: SVG Injector
+type: module
+description: Provides a Twig function to display SVG icons inline.
+core_version_requirement: ^9 || ^10 || ^11
+package: Custom
