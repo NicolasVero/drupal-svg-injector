@@ -1,0 +1,7 @@
+svg_injector.settings:
+  path: '/admin/config/media/svg-injector'
+  defaults:
+    _form: '\Drupal\svg_injector\Form\SvgInjectorSettingsForm'
+    _title: 'Icons configuration'
+  requirements:
+    _permission: 'administer site configuration'

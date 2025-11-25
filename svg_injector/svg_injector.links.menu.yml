@@ -1,0 +1,5 @@
+svg_injector.settings:
+  title: 'SVG Injector'
+  description: 'Configure the location of SVG icons.'
+  route_name: svg_injector.settings
+  parent: system.admin_config_media

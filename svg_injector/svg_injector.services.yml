@@ -1,0 +1,8 @@
+services:
+  svg_injector.twig.icon_extension:
+    class: Drupal\svg_injector\Twig\SvgInjectorExtension
+    arguments:
+      - '@config.factory'
+      - '@extension.list.theme'
+    tags:
+      - { name: twig.extension }
