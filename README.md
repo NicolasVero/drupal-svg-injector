@@ -1,0 +1,1 @@
+# drupal-svg-injector
