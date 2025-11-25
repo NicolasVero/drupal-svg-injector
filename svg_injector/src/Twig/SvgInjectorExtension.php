@@ -23,7 +23,7 @@ class SvgInjectorExtension extends AbstractExtension {
         ];
     }
 
-    public function renderIcon(string $name, array $attributes = []): string {
+    public function renderIcon(string $name): string {
         static $cache = [];
 
         if (!isset($cache[$name])) {
