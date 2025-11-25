@@ -9,9 +9,11 @@ use Twig\TwigFunction;
 
 class SvgInjectorExtension extends AbstractExtension {
 
+    protected $configFactory;
     protected $themeHandler;
 
-    public function __construct($theme_handler) {
+    public function __construct($config_factory, $theme_handler) {
+        $this->configFactory = $config_factory;
         $this->themeHandler = $theme_handler;
     }
 
@@ -24,27 +26,17 @@ class SvgInjectorExtension extends AbstractExtension {
     public function renderIcon(string $name, array $attributes = []): string {
         static $cache = [];
 
-        if (isset($cache[$name])) {
-            $svg = $cache[$name];
-        }
-        else {
-            $active_theme = \Drupal::theme()->getActiveTheme()->getName();
-            $theme_path = $this->themeHandler->getPath($active_theme);
-
-            $path = DRUPAL_ROOT . '/' . $theme_path . '/src/assets/images/icons/' . $name . '.svg';
+        if (!isset($cache[$name])) {
+            $icon_path = $this->configFactory->get('svg_injector.settings')->get('icon_path');
+            $path = DRUPAL_ROOT . '/' . $icon_path . '/' . $name . '.svg';
 
             if (!is_readable($path)) {
-                return sprintf('<!-- Icon not found: %s -->', Html::escape($name));
+                return "<!-- Icon not found: $name -->";
             }
 
-            $svg = file_get_contents($path) ?: '';
-            $cache[$name] = $svg;
+            $cache[$name] = file_get_contents($path);
         }
 
-        if ($svg === '') {
-            return sprintf('<!-- Icon empty: %s -->', Html::escape($name));
-        }
-
-        return $svg;
+        return $cache[$name];
     }
 }
