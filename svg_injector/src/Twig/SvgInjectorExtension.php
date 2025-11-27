@@ -10,33 +10,66 @@ use Twig\TwigFunction;
 class SvgInjectorExtension extends AbstractExtension {
 
     protected $configFactory;
-    protected $themeHandler;
 
-    public function __construct($config_factory, $theme_handler) {
+    public function __construct($config_factory) {
         $this->configFactory = $config_factory;
-        $this->themeHandler = $theme_handler;
     }
 
     public function getFunctions() {
         return [
-            new TwigFunction('icon', [$this, 'renderIcon'], ['is_safe' => ['html']]),
+            new TwigFunction('svg_icon', [$this, 'renderIcon'], ['is_safe' => ['html']]),
         ];
     }
 
     public function renderIcon(string $name): string {
         static $cache = [];
 
-        if (!isset($cache[$name])) {
-            $icon_path = $this->configFactory->get('svg_injector.settings')->get('icon_path');
-            $path = DRUPAL_ROOT . '/' . $icon_path . '/' . $name . '.svg';
-
-            if (!is_readable($path)) {
-                return "<!-- Icon not found: $name -->";
-            }
-
-            $cache[$name] = file_get_contents($path);
+        if (isset($cache[$name])) {
+            return $cache[$name];
         }
 
-        return $cache[$name];
+        $index = $this->getSvgIndex();
+
+        if (!isset($index[$name])) {
+            return "<!-- Icon not found: $name -->";
+        }
+
+        $svg = @file_get_contents($index[$name]);
+
+        if ($svg === false) {
+            return "<!-- Icon unreadable: $name -->";
+        }
+
+        $cache[$name] = $svg;
+        return $svg;
+    }
+
+    protected function getSvgIndex(): array {
+        $cid = 'svg_injector.index';
+
+        if ($cached = \Drupal::cache()->get($cid)) {
+            return $cached->data;
+        }
+
+        $icon_path = $this->configFactory->get('svg_injector.settings')->get('icon_path');
+        $absolute_path = DRUPAL_ROOT . '/' . $icon_path;
+
+        $index = [];
+
+        if (is_dir($absolute_path)) {
+            $files = \Drupal::service('file_system')->scanDirectory($absolute_path, '/\.svg$/');
+
+            foreach ($files as $file) {
+                $filename = $file->filename;
+                $name = pathinfo($filename, PATHINFO_FILENAME);
+
+                if (!isset($index[$name])) {
+                    $index[$name] = $file->uri;
+                }
+            }
+        }
+
+        \Drupal::cache()->set($cid, $index, time() + 3600);
+        return $index;
     }
 }
