@@ -48,10 +48,16 @@ class SvgInjectorExtension extends AbstractExtension {
 
     private function addSvgParameters(&$svg, $parameters) {
         $map = [
-            'fill'   => ['fill'],
-            'width'  => ['width'],
-            'height' => ['height'],
-            'size'   => ['width', 'height'],
+            'fill'         => ['fill'],
+            'stroke'       => ['stroke'],
+            'stroke_width' => ['stroke-width'],
+            'width'        => ['width'],
+            'height'       => ['height'],
+            'size'         => ['width', 'height'],
+            'class'        => ['class'],
+            'id'           => ['id'],
+            'aria_label'   => ['aria-label'],
+            'role'         => ['role']
         ];
 
         foreach ($map as $param => $attributes) {
