@@ -4,24 +4,25 @@ namespace Drupal\svg_injector\Twig;
 
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
 class SvgInjectorExtension extends AbstractExtension {
 
-    protected $configFactory;
+    private ConfigFactoryInterface $configFactory;
 
-    public function __construct($config_factory) {
+    public function __construct(ConfigFactoryInterface $config_factory) {
         $this->configFactory = $config_factory;
     }
 
-    public function getFunctions() {
+    public function getFunctions(): array {
         return [
             new TwigFunction('svg_icon', [$this, 'renderIcon'], ['is_safe' => ['html']]),
         ];
     }
 
-    public function renderIcon(string $name, array|null $parameters = null): string|null {
+    public function renderIcon(string $name, array $parameters = []): ?string {
         static $cache = [];
 
         $cacheKey = md5($name . ':' . serialize($parameters));
@@ -50,7 +51,8 @@ class SvgInjectorExtension extends AbstractExtension {
         return $svg;
     }
 
-    private function addSvgParameters(&$svg, $parameters) {
+
+    private function addSvgParameters(string &$svg, array $parameters): void {
         $map = [
             'fill'         => ['fill'],
             'stroke'       => ['stroke'],
@@ -79,11 +81,11 @@ class SvgInjectorExtension extends AbstractExtension {
         }
     }
 
-    private function addSvgParameter(&$svg, $element, $value) {
+    private function addSvgParameter(string &$svg, string $element, string|int $value): void {
         $svg = preg_replace('/<svg\b/i', '<svg ' . $element . '="' . $value . '"', $svg, 1);
     }
 
-    protected function getSvgIndex(): array {
+    private function getSvgIndex(): array {
         $cid = 'svg_injector.index';
 
         if ($cached = \Drupal::cache()->get($cid)) {

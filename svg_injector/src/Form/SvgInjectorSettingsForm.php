@@ -8,18 +8,18 @@ use Drupal\Core\File\FileSystemInterface;
 
 class SvgInjectorSettingsForm extends ConfigFormBase {
 
-    protected function getEditableConfigNames() {
+    protected function getEditableConfigNames(): array {
         return ['svg_injector.settings'];
     }
 
-    public function getFormId() {
+    public function getFormId(): string {
         return 'svg_injector_settings_form';
     }
 
-    public function buildForm(array $form, FormStateInterface $form_state) {
+    public function buildForm(array $form, FormStateInterface $form_state): array {
         $config = $this->config('svg_injector.settings');
         $path = $form_state->getValue('icon_path') ?? $config->get('icon_path');
-        $svgCount = $this->countSvgInFolder($path);
+        $svgCount = $this->countSvgInFolder($path ?? "");
 
         $form['icon_path'] = [
             '#type' => 'textfield',
@@ -46,7 +46,7 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
         return parent::buildForm($form, $form_state);
     }
 
-    public function updateSvgCount(array &$form, FormStateInterface $form_state) {
+    public function updateSvgCount(array &$form, FormStateInterface $form_state): mixed {
         return $form['svg_count_wrapper'];
     }
 
@@ -75,7 +75,7 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
         return count($results);
     }
 
-    public function submitForm(array &$form, FormStateInterface $form_state) {
+    public function submitForm(array &$form, FormStateInterface $form_state): void {
         $this->config('svg_injector.settings')
             ->set('icon_path', $form_state->getValue('icon_path'))
             ->save();
