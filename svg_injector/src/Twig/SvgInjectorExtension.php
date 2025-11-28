@@ -49,7 +49,7 @@ class SvgInjectorExtension extends AbstractExtension {
         // Retrieves the unit setting defined in the configuration page
         $unit = $this->configFactory->get('svg_injector.settings')->get('size_unit') ?? 'px';
         if (!empty($parameters)) {
-            $this->addSvgParameters($svg, $parameters);
+            $this->applySvgParameters($svg, $parameters);
         }
 
         $cache[$cacheKey] = $svg;
@@ -57,7 +57,7 @@ class SvgInjectorExtension extends AbstractExtension {
     }
 
 
-    private function addSvgParameters(string &$svg, array $parameters): void {
+    private function applySvgParameters(string &$svg, array $parameters): void {
         // Permitted settings
         $map = [
             'fill'         => ['fill'],
@@ -90,12 +90,12 @@ class SvgInjectorExtension extends AbstractExtension {
             foreach ($attributes as $attr) {
                 // Cleaning up existing attributes from svg
                 $svg = preg_replace('/(<svg[^>]*?)\s' . $attr . '="[^"]*"/i', '$1', $svg);
-                $this->addSvgParameter($svg, $attr, $value);
+                $this->injectSvgParameter($svg, $attr, $value);
             }
         }
     }
 
-    private function addSvgParameter(string &$svg, string $element, string|int $value): void {
+    private function injectSvgParameter(string &$svg, string $element, string|int $value): void {
         $svg = preg_replace('/<svg\b/i', '<svg ' . $element . '="' . $value . '"', $svg, 1);
     }
 
