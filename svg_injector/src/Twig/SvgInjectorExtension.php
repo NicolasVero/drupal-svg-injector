@@ -70,17 +70,7 @@ class SvgInjectorExtension extends AbstractExtension {
     }
 
     private function addSvgParameter(&$svg, $element, $value) {
-        if ($element == 'fill') {
-            $svg = preg_replace('/<svg\b/i', '<svg fill="' . $value . '"', $svg, 1);
-        }
-
-        if ($element == 'width') {
-            $svg = preg_replace('/<svg\b/i', '<svg width="' . $value . '"', $svg, 1);
-        }
-
-        if ($element == 'height') {
-            $svg = preg_replace('/<svg\b/i', '<svg height="' . $value . '"', $svg, 1);
-        }
+        $svg = preg_replace('/<svg\b/i', '<svg ' . $element . '="' . $value . '"', $svg, 1);
     }
 
     protected function getSvgIndex(): array {
