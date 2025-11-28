@@ -43,6 +43,7 @@ class SvgInjectorExtension extends AbstractExtension {
             return "<!-- Icon unreadable: $name -->";
         }
 
+        $unit = $this->configFactory->get('svg_injector.settings')->get('size_unit') ?? 'px';
         if (!empty($parameters)) {
             $this->addSvgParameters($svg, $parameters);
         }
@@ -71,7 +72,14 @@ class SvgInjectorExtension extends AbstractExtension {
                 continue;
             }
 
-            $value = htmlspecialchars($parameters[$param], ENT_QUOTES);
+            $isSizedAttribute = in_array($param, ['width', 'height', 'size'], true);
+            $value = $parameters[$param];
+
+            if ($isSizedAttribute && is_numeric($value)) {
+                $value .= $this->getUnit();
+            }
+
+            $value = htmlspecialchars($value, ENT_QUOTES);
 
             foreach ($attributes as $attr) {
                 // Cleaning up existing attributes from svg
@@ -112,5 +120,9 @@ class SvgInjectorExtension extends AbstractExtension {
 
         \Drupal::cache()->set($cid, $index, time() + 3600);
         return $index;
+    }
+
+    private function getUnit(): string {
+        return $this->configFactory->get('svg_injector.settings')->get('size_unit') ?? 'px';
     }
 }

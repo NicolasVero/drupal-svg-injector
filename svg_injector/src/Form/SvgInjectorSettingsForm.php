@@ -25,7 +25,7 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
             '#type' => 'textfield',
             '#title' => $this->t('Path to SVG icons'),
             '#default_value' => $path,
-            '#description' => $this->t('Relative path from Drupal root (e.g., themes/custom/your_theme/src/assets/images/icons)'),
+            '#description' => $this->t('Relative path from Drupal root (e.g., themes/custom/your_theme/src/assets/icons)'),
             '#required' => true,
             '#ajax' => [
                 'callback' => '::updateSvgCount',
@@ -40,7 +40,22 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
         ];
 
         $form['svg_count_wrapper']['icons_count'] = [
-            '#markup' => '<p><strong>' . $this->getSvgCountMessage($svgCount) . '</strong></p>',
+            '#markup' => '<p><strong>' . $this->getSvgCountMessage($svgCount) . '</strong></p><br>',
+        ];
+
+        $form['size_unit'] = [
+            '#type' => 'select',
+            '#title' => $this->t('Unit for size / width / height'),
+            '#options' => [
+                'px'  => 'px',
+                'em'  => 'em',
+                'rem' => 'rem',
+                '%'   => '%',
+                'vh'  => 'vh',
+                'vw'  => 'vw',
+            ],
+            '#default_value' => $config->get('size_unit') ?? 'px',
+            '#description' => $this->t('Unit used when applying size, width, or height attributes to SVG icons.'),
         ];
 
         return parent::buildForm($form, $form_state);
@@ -78,6 +93,7 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
     public function submitForm(array &$form, FormStateInterface $form_state): void {
         $this->config('svg_injector.settings')
             ->set('icon_path', $form_state->getValue('icon_path'))
+            ->set('size_unit', $form_state->getValue('size_unit'))
             ->save();
 
         parent::submitForm($form, $form_state);
