@@ -21,27 +21,62 @@ class SvgInjectorExtension extends AbstractExtension {
         ];
     }
 
-    public function renderIcon(string $name): string {
+    public function renderIcon(string $name, array|null $parameters = null): string|null {
         static $cache = [];
 
         if (isset($cache[$name])) {
-            return $cache[$name];
+            $svg = $cache[$name];
+        } else {
+            $index = $this->getSvgIndex();
+
+            if (!isset($index[$name])) {
+                return "<!-- Icon not found: $name -->";
+            }
+
+            $svg = @file_get_contents($index[$name]);
+
+            if ($svg === false) {
+                return "<!-- Icon unreadable: $name -->";
+            }
+
+            $cache[$name] = $svg;
         }
 
-        $index = $this->getSvgIndex();
-
-        if (!isset($index[$name])) {
-            return "<!-- Icon not found: $name -->";
-        }
-
-        $svg = @file_get_contents($index[$name]);
-
-        if ($svg === false) {
-            return "<!-- Icon unreadable: $name -->";
-        }
-
-        $cache[$name] = $svg;
+        $this->addSvgParameters($svg, $parameters);
         return $svg;
+    }
+
+    private function addSvgParameters(&$svg, $parameters) {
+        $map = [
+            'fill'         => ['fill'],
+            'stroke'       => ['stroke'],
+            'stroke_width' => ['stroke-width'],
+            'width'        => ['width'],
+            'height'       => ['height'],
+            'size'         => ['width', 'height'],
+            'class'        => ['class'],
+            'id'           => ['id'],
+            'aria_label'   => ['aria-label'],
+            'role'         => ['role']
+        ];
+
+        foreach ($map as $param => $attributes) {
+            if (empty($parameters[$param])) {
+                continue;
+            }
+
+            $value = htmlspecialchars($parameters[$param], ENT_QUOTES);
+
+            foreach ($attributes as $attr) {
+                // Cleaning up existing attributes from svg
+                $svg = preg_replace('/(<svg[^>]*?)\s' . $attr . '="[^"]*"/i', '$1', $svg);
+                $this->addSvgParameter($svg, $attr, $value);
+            }
+        }
+    }
+
+    private function addSvgParameter(&$svg, $element, $value) {
+        $svg = preg_replace('/<svg\b/i', '<svg ' . $element . '="' . $value . '"', $svg, 1);
     }
 
     protected function getSvgIndex(): array {
