@@ -4,26 +4,29 @@ namespace Drupal\svg_injector\Twig;
 
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
 class SvgInjectorExtension extends AbstractExtension {
 
-    protected $configFactory;
+    private ConfigFactoryInterface $configFactory;
 
-    public function __construct($config_factory) {
+    public function __construct(ConfigFactoryInterface $config_factory) {
         $this->configFactory = $config_factory;
     }
 
-    public function getFunctions() {
+    public function getFunctions(): array {
+        // Makes the function 'svg_icon' available in Twig
         return [
             new TwigFunction('svg_icon', [$this, 'renderIcon'], ['is_safe' => ['html']]),
         ];
     }
 
-    public function renderIcon(string $name, array|null $parameters = null): string|null {
+    public function renderIcon(string $name, array $parameters = []): ?string {
         static $cache = [];
 
+        // Caching the svg while taking its parameters into account
         $cacheKey = md5($name . ':' . serialize($parameters));
 
         if (isset($cache[$cacheKey])) {
@@ -36,12 +39,15 @@ class SvgInjectorExtension extends AbstractExtension {
             return "<!-- Icon not found: $name -->";
         }
 
+        // Attempt to read the svg, removal of errors with '@'
         $svg = @file_get_contents($index[$name]);
 
         if ($svg === false) {
             return "<!-- Icon unreadable: $name -->";
         }
 
+        // Retrieves the unit setting defined in the configuration page
+        $unit = $this->configFactory->get('svg_injector.settings')->get('size_unit') ?? 'px';
         if (!empty($parameters)) {
             $this->addSvgParameters($svg, $parameters);
         }
@@ -50,7 +56,9 @@ class SvgInjectorExtension extends AbstractExtension {
         return $svg;
     }
 
-    private function addSvgParameters(&$svg, $parameters) {
+
+    private function addSvgParameters(string &$svg, array $parameters): void {
+        // Permitted settings
         $map = [
             'fill'         => ['fill'],
             'stroke'       => ['stroke'],
@@ -69,7 +77,15 @@ class SvgInjectorExtension extends AbstractExtension {
                 continue;
             }
 
-            $value = htmlspecialchars($parameters[$param], ENT_QUOTES);
+            // Applies units to parameters relating to the size of the svg
+            $isSizedAttribute = in_array($param, ['width', 'height', 'size'], true);
+            $value = $parameters[$param];
+
+            if ($isSizedAttribute && is_numeric($value)) {
+                $value .= $this->getUnit();
+            }
+
+            $value = htmlspecialchars($value, ENT_QUOTES);
 
             foreach ($attributes as $attr) {
                 // Cleaning up existing attributes from svg
@@ -79,11 +95,11 @@ class SvgInjectorExtension extends AbstractExtension {
         }
     }
 
-    private function addSvgParameter(&$svg, $element, $value) {
+    private function addSvgParameter(string &$svg, string $element, string|int $value): void {
         $svg = preg_replace('/<svg\b/i', '<svg ' . $element . '="' . $value . '"', $svg, 1);
     }
 
-    protected function getSvgIndex(): array {
+    private function getSvgIndex(): array {
         $cid = 'svg_injector.index';
 
         if ($cached = \Drupal::cache()->get($cid)) {
@@ -110,5 +126,9 @@ class SvgInjectorExtension extends AbstractExtension {
 
         \Drupal::cache()->set($cid, $index, time() + 3600);
         return $index;
+    }
+
+    private function getUnit(): string {
+        return $this->configFactory->get('svg_injector.settings')->get('size_unit') ?? 'px';
     }
 }
