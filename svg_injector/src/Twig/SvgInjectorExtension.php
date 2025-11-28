@@ -47,12 +47,25 @@ class SvgInjectorExtension extends AbstractExtension {
     }
 
     private function addSvgParameters(&$svg, $parameters) {
-        if (!empty($parameters['fill'])) {
-            // Cleaning up existing fill attributes from svg
-            $svg = preg_replace('/(<svg[^>]*?)\sfill="[^"]*"/i', '$1', $svg);
+        $map = [
+            'fill'   => ['fill'],
+            'width'  => ['width'],
+            'height' => ['height'],
+            'size'   => ['width', 'height'],
+        ];
 
-            $fill = htmlspecialchars($parameters['fill'], ENT_QUOTES);
-            $this->addSvgParameter($svg, 'fill', $fill);
+        foreach ($map as $param => $attributes) {
+            if (empty($parameters[$param])) {
+                continue;
+            }
+
+            $value = htmlspecialchars($parameters[$param], ENT_QUOTES);
+
+            foreach ($attributes as $attr) {
+                // Cleaning up existing attributes from svg
+                $svg = preg_replace('/(<svg[^>]*?)\s' . $attr . '="[^"]*"/i', '$1', $svg);
+                $this->addSvgParameter($svg, $attr, $value);
+            }
         }
     }
 
@@ -60,8 +73,16 @@ class SvgInjectorExtension extends AbstractExtension {
         if ($element == 'fill') {
             $svg = preg_replace('/<svg\b/i', '<svg fill="' . $value . '"', $svg, 1);
         }
+
+        if ($element == 'width') {
+            $svg = preg_replace('/<svg\b/i', '<svg width="' . $value . '"', $svg, 1);
+        }
+
+        if ($element == 'height') {
+            $svg = preg_replace('/<svg\b/i', '<svg height="' . $value . '"', $svg, 1);
+        }
     }
-    
+
     protected function getSvgIndex(): array {
         $cid = 'svg_injector.index';
 
