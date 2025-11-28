@@ -24,25 +24,29 @@ class SvgInjectorExtension extends AbstractExtension {
     public function renderIcon(string $name, array|null $parameters = null): string|null {
         static $cache = [];
 
-        if (isset($cache[$name])) {
-            $svg = $cache[$name];
-        } else {
-            $index = $this->getSvgIndex();
+        $cacheKey = md5($name . ':' . serialize($parameters));
 
-            if (!isset($index[$name])) {
-                return "<!-- Icon not found: $name -->";
-            }
-
-            $svg = @file_get_contents($index[$name]);
-
-            if ($svg === false) {
-                return "<!-- Icon unreadable: $name -->";
-            }
-
-            $cache[$name] = $svg;
+        if (isset($cache[$cacheKey])) {
+            return $cache[$cacheKey];
         }
 
-        $this->addSvgParameters($svg, $parameters);
+        $index = $this->getSvgIndex();
+
+        if (!isset($index[$name])) {
+            return "<!-- Icon not found: $name -->";
+        }
+
+        $svg = @file_get_contents($index[$name]);
+
+        if ($svg === false) {
+            return "<!-- Icon unreadable: $name -->";
+        }
+
+        if (!empty($parameters)) {
+            $this->addSvgParameters($svg, $parameters);
+        }
+
+        $cache[$cacheKey] = $svg;
         return $svg;
     }
 
