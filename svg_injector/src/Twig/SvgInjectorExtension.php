@@ -17,6 +17,7 @@ class SvgInjectorExtension extends AbstractExtension {
     }
 
     public function getFunctions(): array {
+        // Makes the function 'svg_icon' available in Twig
         return [
             new TwigFunction('svg_icon', [$this, 'renderIcon'], ['is_safe' => ['html']]),
         ];
@@ -25,6 +26,7 @@ class SvgInjectorExtension extends AbstractExtension {
     public function renderIcon(string $name, array $parameters = []): ?string {
         static $cache = [];
 
+        // Caching the svg while taking its parameters into account
         $cacheKey = md5($name . ':' . serialize($parameters));
 
         if (isset($cache[$cacheKey])) {
@@ -37,12 +39,14 @@ class SvgInjectorExtension extends AbstractExtension {
             return "<!-- Icon not found: $name -->";
         }
 
+        // Attempt to read the svg, removal of errors with '@'
         $svg = @file_get_contents($index[$name]);
 
         if ($svg === false) {
             return "<!-- Icon unreadable: $name -->";
         }
 
+        // Retrieves the unit setting defined in the configuration page
         $unit = $this->configFactory->get('svg_injector.settings')->get('size_unit') ?? 'px';
         if (!empty($parameters)) {
             $this->addSvgParameters($svg, $parameters);
@@ -54,6 +58,7 @@ class SvgInjectorExtension extends AbstractExtension {
 
 
     private function addSvgParameters(string &$svg, array $parameters): void {
+        // Permitted settings
         $map = [
             'fill'         => ['fill'],
             'stroke'       => ['stroke'],
@@ -72,6 +77,7 @@ class SvgInjectorExtension extends AbstractExtension {
                 continue;
             }
 
+            // Applies units to parameters relating to the size of the svg
             $isSizedAttribute = in_array($param, ['width', 'height', 'size'], true);
             $value = $parameters[$param];
 

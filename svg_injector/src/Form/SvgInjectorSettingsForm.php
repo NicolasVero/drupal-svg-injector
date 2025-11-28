@@ -21,6 +21,7 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
         $path = $form_state->getValue('icon_path') ?? $config->get('icon_path');
         $svgCount = $this->countSvgInFolder($path ?? "");
 
+        // Configuration form on the path to svg
         $form['icon_path'] = [
             '#type' => 'textfield',
             '#title' => $this->t('Path to SVG icons'),
@@ -34,6 +35,7 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
             ],
         ];
 
+        // svg counter found in the specified folder
         $form['svg_count_wrapper'] = [
             '#type' => 'container',
             '#attributes' => ['id' => 'svg-count-wrapper'],
@@ -43,6 +45,7 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
             '#markup' => '<p><strong>' . $this->getSvgCountMessage($svgCount) . '</strong></p><br>',
         ];
 
+        // Configuration form for configuring the unit of measurement used 
         $form['size_unit'] = [
             '#type' => 'select',
             '#title' => $this->t('Unit for size / width / height'),
@@ -74,6 +77,7 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
     }
 
     private function countSvgInFolder(string $path): int {
+        // Recursively search for svg files in the folder specified by the user
         if (empty($path)) {
             return 0;
         }
@@ -91,6 +95,7 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
     }
 
     public function submitForm(array &$form, FormStateInterface $form_state): void {
+        // Saving user settings during registration
         $this->config('svg_injector.settings')
             ->set('icon_path', $form_state->getValue('icon_path'))
             ->set('size_unit', $form_state->getValue('size_unit'))
