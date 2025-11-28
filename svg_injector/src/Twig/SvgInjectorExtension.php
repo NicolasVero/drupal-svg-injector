@@ -21,29 +21,47 @@ class SvgInjectorExtension extends AbstractExtension {
         ];
     }
 
-    public function renderIcon(string $name): string {
+    public function renderIcon(string $name, array|null $parameters = null): string|null {
         static $cache = [];
 
         if (isset($cache[$name])) {
-            return $cache[$name];
+            $svg = $cache[$name];
+        } else {
+            $index = $this->getSvgIndex();
+
+            if (!isset($index[$name])) {
+                return "<!-- Icon not found: $name -->";
+            }
+
+            $svg = @file_get_contents($index[$name]);
+
+            if ($svg === false) {
+                return "<!-- Icon unreadable: $name -->";
+            }
+
+            $cache[$name] = $svg;
         }
 
-        $index = $this->getSvgIndex();
-
-        if (!isset($index[$name])) {
-            return "<!-- Icon not found: $name -->";
-        }
-
-        $svg = @file_get_contents($index[$name]);
-
-        if ($svg === false) {
-            return "<!-- Icon unreadable: $name -->";
-        }
-
-        $cache[$name] = $svg;
+        $this->addSvgParameters($svg, $parameters);
         return $svg;
     }
 
+    private function addSvgParameters(&$svg, $parameters) {
+        if (!empty($parameters['fill'])) {
+            // Cleaning up existing fill attributes from svg
+            $svg = preg_replace('/(<svg[^>]*?)\sfill="[^"]*"/i', '$1', $svg);
+
+            $fill = htmlspecialchars($parameters['fill'], ENT_QUOTES);
+            $this->addSvgParameter($svg, 'fill', $fill);
+        }
+    }
+
+    private function addSvgParameter(&$svg, $element, $value) {
+        if ($element == 'fill') {
+            $svg = preg_replace('/<svg\b/i', '<svg fill="' . $value . '"', $svg, 1);
+        }
+    }
+    
     protected function getSvgIndex(): array {
         $cid = 'svg_injector.index';
 
