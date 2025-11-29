@@ -29,7 +29,7 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
             '#description' => $this->t('Relative path from Drupal root (e.g., themes/custom/your_theme/src/assets/icons)'),
             '#required' => true,
             '#ajax' => [
-                'callback' => '::updateSvgCount',
+                'callback' => '::ajaxUpdateSvgCount',
                 'event' => 'blur',
                 'wrapper' => 'svg-count-wrapper',
             ],
@@ -42,7 +42,7 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
         ];
 
         $form['svg_count_wrapper']['icons_count'] = [
-            '#markup' => '<p><strong>' . $this->getSvgCountMessage($svgCount) . '</strong></p><br>',
+            '#markup' => '<p><strong>' . $this->formatSvgCountMessage($svgCount) . '</strong></p><br>',
         ];
 
         // Configuration form for configuring the unit of measurement used 
@@ -64,11 +64,11 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
         return parent::buildForm($form, $form_state);
     }
 
-    public function updateSvgCount(array &$form, FormStateInterface $form_state): mixed {
+    public function ajaxUpdateSvgCount(array &$form, FormStateInterface $form_state): mixed {
         return $form['svg_count_wrapper'];
     }
 
-    private function getSvgCountMessage($count): string {
+    private function formatSvgCountMessage($count): string {
         return match (true) {
             $count <= 0 => $this->t('No icons found in this folder.'),
             $count == 1 => $this->t('1 icon found in this folder.'),
