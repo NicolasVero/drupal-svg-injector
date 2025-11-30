@@ -124,7 +124,9 @@ class SvgInjectorExtension extends AbstractExtension {
             }
         }
 
-        \Drupal::cache()->set($cid, $index, time() + 3600);
+        $cache_duration = $this->configFactory->get('svg_injector.settings')->get('cache_duration') ?? 3600;
+        \Drupal::cache()->set($cid, $index, $cache_duration);
+        
         return $index;
     }
 

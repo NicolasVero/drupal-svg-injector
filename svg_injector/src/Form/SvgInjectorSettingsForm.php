@@ -61,6 +61,15 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
             '#description' => $this->t('Unit used when applying size, width, or height attributes to SVG icons.'),
         ];
 
+        // Configuration form for cache duration
+        $form['cache_duration'] = [
+            '#type' => 'number',
+            '#title' => $this->t('Cache duration (in seconds)'),
+            '#default_value' => $config->get('cache_duration') ?? 3600,
+            '#min' => 0,
+            '#description' => $this->t('Duration during which the generated SVG index is cached. Set to 0 to disable caching.'),
+        ];
+
         return parent::buildForm($form, $form_state);
     }
 
@@ -99,6 +108,7 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
         $this->config('svg_injector.settings')
             ->set('icon_path', $form_state->getValue('icon_path'))
             ->set('size_unit', $form_state->getValue('size_unit'))
+            ->set('cache_duration', $form_state->getValue('cache_duration'))
             ->save();
 
         parent::submitForm($form, $form_state);
