@@ -1,14 +1,14 @@
 <?php
 
-	namespace Drupal\svg_injector\Commands;
+namespace Drupal\svg_injector\Commands;
 
-	use Drush\Commands\DrushCommands;
-	use Drupal\Core\Cache\Cache;
+use Drush\Commands\DrushCommands;
+use Drupal\Core\Cache\Cache;
 
-	/**
-	 * Drush commands for Svg Injector module.
-	 */
-	class SvgInjectorCommands extends DrushCommands {
+/**
+ * Drush commands for Svg Injector module.
+ */
+class SvgInjectorCommands extends DrushCommands {
 
 	/**
 	 * Clears the SVG index cache.
