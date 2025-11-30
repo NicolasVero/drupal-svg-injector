@@ -104,6 +104,9 @@ class SvgInjectorSettingsForm extends ConfigFormBase {
     }
 
     public function submitForm(array &$form, FormStateInterface $form_state): void {
+        // Invalidate cache tag when configuration changes.
+        \Drupal\Core\Cache\Cache::invalidateTags(['svg_injector:index']);
+
         // Saving user settings during registration
         $this->config('svg_injector.settings')
             ->set('icon_path', $form_state->getValue('icon_path'))
