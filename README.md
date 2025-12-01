@@ -7,7 +7,7 @@ It automatically loads SVG files from a configurable directory, applies custom a
 
 This module is ideal for theme developers who need clean, configurable, and reusable SVG rendering inside Drupal templates.
 
----
+<br>
 
 ## Features
 
@@ -68,12 +68,26 @@ The module provides two configuration options:
   Determines the default CSS unit applied when numeric values are passed to `size`, `width`, or `height` in Twig.  
   Supported units include `px`, `em`, `rem`, `%`, `vw`, and `vh`, offering flexible sizing that adapts to your design system.
 
+- **SVG cache duration**  
+  Defines how long the generated SVG index should be cached.  
+  Increasing the duration improves performance, while lowering it ensures faster updates when SVG files change.  
+  The default value is **3600 seconds** (1 hour).
+
 ---
+
+### 🧹 Drush Commands
+
+The module provides a dedicated Drush command to clear the SVG index cache without flushing the entire Drupal cache:
+
+**`svg-injector:cache-remove` /  `svg-injector:cr` / `si:cr`**  
+Clears the cached SVG index so newly added or modified SVG files are detected immediately.
+This allows you to refresh only the SVG-related cache quickly, similar to `drush cr` but without affecting the rest of the site.
+
+<br>
 
 ## Compatibility
 
-> [!IMPORTANT]
-> This module requires a minimum of **Drupal 10** and **PHP 8.2** to operate correctly.
+This module requires a minimum of **Drupal 9** and **PHP 8.2** to operate correctly.
 
 
 
