@@ -61,7 +61,7 @@ The configuration settings for the module are available at `/admin/config/media/
 The module provides two configuration options:
 
 - **Path to SVG icons**  
-  Defines the directory in which your SVG files are stored.  
+  Defines the root directory for your SVG files. The module recursively scans this folder and all its subdirectories.  
   The module scans this folder and automatically indexes all `.svg` files so they can be used with the `svg_icon()` Twig function.
 
 - **Unit for size, width, and height**  
