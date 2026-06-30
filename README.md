@@ -58,7 +58,7 @@ Here are a few practical examples of how to use the Twig function:
 
 The configuration settings for the module are available at `/admin/config/media/svg-injector`.
 
-The module provides two configuration options:
+This module offers several configuration options:
 
 - **Path to SVG icons**  
   Defines the root directory for your SVG files. The module recursively scans this folder and all its subdirectories.  
